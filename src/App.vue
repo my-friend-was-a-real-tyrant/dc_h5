@@ -1,23 +1,34 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <router-view class="router-view"/>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  created() {
+    
+  }
 }
 </script>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="less">
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  position: absolute;
+  padding:0;
+  *{
+    font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  }
+  #app{
+    width:100%;
+    height:100%;
+    .roter-view{
+      width:100%;
+    }
+  }
 }
 </style>
