@@ -100,8 +100,10 @@ export default {
                         })
                         .then((res)=>{
                                 if(res.code==0) {
-                                        console.log(JSON.stringify(res.data))
-                                        console.log(Crypt.Decrypt(res.data));
+                                        let find = res.data.replace(new RegExp(/\n/,"gm"),'');
+                                        let resdata = JSON.parse(Crypt.Decrypt(find))
+                                        console.log(resdata)
+                                        this.downloadUrl = resdata.url || '';
                                 } else {
                                         Toast.fail(res.msg);
                                 }
