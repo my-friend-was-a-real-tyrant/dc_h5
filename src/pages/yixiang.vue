@@ -10,7 +10,7 @@
                                 </div>
                                 <div class="input-box">
                                         <input type="text" placeholder="请输入验证码" v-model="code">
-                                        <span class="send-btn" :class="wait>0?'disabled':''" @click="send_sms">{{wait>0?'重新发送（'+wait+'秒）':'获取验证码'}}</span>
+                                        <span class="send-btn-3" :class="wait>0?'disabled':''" @click="send_sms">{{wait>0?'重新发送（'+wait+'秒）':'获取验证码'}}</span>
                                 </div>
                                 <div class="submit-btn" @click="handle_submit">
                                         <img class="btn-img" :src="$route.meta.slices.btn" alt="">
@@ -253,7 +253,7 @@ export default {
                                         input:-ms-input-placeholder{  /* Internet Explorer 10-11 */ 
                                         color:#ccc;
                                         }
-                                        .send-btn{
+                                        .send-btn-3{
                                                 padding-left: .1rem;
                                                 font-size: .24rem;
                                                 color:#FF9392;
