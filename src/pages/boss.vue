@@ -97,7 +97,6 @@ Array.prototype.forEach.call(n, function(dom) {
                         })
                 },
                 handle_submit() {
-                        this.download()
                         if(this.telephone.length!=11) {
                                 Toast.fail('请先输入一个正确的手机号')
                                 return;
