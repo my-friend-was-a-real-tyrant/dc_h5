@@ -49,13 +49,28 @@ export default {
                 
                 this.send_data(0);//发送PV埋点
                 
-                var n = document.querySelectorAll('input,textarea');
-                Array.prototype.forEach.call(n, function(dom) {        
-                var pageDom = 5;
-                dom.onblur = function() {
-                document.body.scrollTop = ++pageDom;
-                };
-                });
+                (function () {
+                let myFunction
+                let isWXAndIos = isWeiXinAndIos()
+                if (isWXAndIos) {
+                document.body.addEventListener('focusin', () => {
+                clearTimeout(myFunction)
+                })
+                document.body.addEventListener('focusout', () => {
+                clearTimeout(myFunction)
+                myFunction = setTimeout(function() {
+                        window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
+                }, 100)
+                })
+                }
+                })()
+
+                function isWeiXinAndIos () {
+                let ua = '' + window.navigator.userAgent.toLowerCase()
+                let isWeixin = /MicroMessenger/i.test(ua)
+                let isIos = /\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(ua)
+                return isWeixin && isIos
+                }
                 this.get_download_link();
         },
         methods:{
