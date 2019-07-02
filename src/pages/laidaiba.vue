@@ -64,7 +64,7 @@ Array.prototype.forEach.call(n, function(dom) {
                                 channelCode:this.channelCode,
                                 type:type
                         };
-                        this.$axios.get('/api/user/traceChannel',data)
+                        this.$axios.get('/api/user/traceChannel',{params:data})
                 },
                 setDevice() {
                         var u = navigator.userAgent, app = navigator.appVersion;
