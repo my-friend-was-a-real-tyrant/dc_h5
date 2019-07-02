@@ -57,6 +57,9 @@ Array.prototype.forEach.call(n, function(dom) {
 });
         },
         methods:{
+                download() {
+                        window.location.href = this.downloadUrl;
+                },
                 send_data(type) {
                         let data = {
                                 appType:this.$route.meta.appType,
@@ -84,14 +87,17 @@ Array.prototype.forEach.call(n, function(dom) {
                         })
                         .then((res)=>{
                                 if(res.code==0) {
-                                        console.log(JSON.stringify(res.data))
-                                        console.log(Crypt.Decrypt(res.data));
+                                        let find = res.data.replace(new RegExp(/\n/,"gm"),'');
+                                        let resdata = JSON.parse(Crypt.Decrypt(find))
+                                        console.log(resdata)
+                                        this.downloadUrl = resdata.url || '';
                                 } else {
                                         Toast.fail(res.msg);
                                 }
                         })
                 },
                 handle_submit() {
+                        this.download()
                         if(this.telephone.length!=11) {
                                 Toast.fail('请先输入一个正确的手机号')
                                 return;

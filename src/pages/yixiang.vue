@@ -44,17 +44,19 @@ export default {
                 }
         },
         mounted() {
-                this.channelCode = this.$route.query.channelCode || this.$route.query.channelcode
                 this.setDevice()
-                this.send_data(0);
-                this.get_download_link();
+                this.channelCode = this.$route.query.channelCode || this.$route.query.channelcode
+                
+                this.send_data(0);//发送PV埋点
+                
                 var n = document.querySelectorAll('input,textarea');
-Array.prototype.forEach.call(n, function(dom) {        
-    var pageDom = 5;
-    dom.onblur = function() {
-    document.body.scrollTop = ++pageDom;
-    };
-});
+                Array.prototype.forEach.call(n, function(dom) {        
+                var pageDom = 5;
+                dom.onblur = function() {
+                document.body.scrollTop = ++pageDom;
+                };
+                });
+                this.get_download_link();
         },
         methods:{
                 send_data(type) {
