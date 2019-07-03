@@ -73,6 +73,9 @@ export default {
                 }
         },
         methods:{
+                download() {
+                        window.location.href = this.downloadUrl;
+                },
                 send_data(type) {
                         let data = {
                                 appType:this.$route.meta.appType,

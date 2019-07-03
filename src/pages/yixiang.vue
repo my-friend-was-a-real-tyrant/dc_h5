@@ -66,14 +66,17 @@ export default {
                 })()
 
                 function isWeiXinAndIos () {
-                let ua = '' + window.navigator.userAgent.toLowerCase()
-                let isWeixin = /MicroMessenger/i.test(ua)
-                let isIos = /\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(ua)
-                return isWeixin && isIos
+                        let ua = '' + window.navigator.userAgent.toLowerCase()
+                        let isWeixin = /MicroMessenger/i.test(ua)
+                        let isIos = /\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(ua)
+                        return isWeixin && isIos
                 }
                 this.get_download_link();
         },
         methods:{
+                download() {
+                        window.location.href = this.downloadUrl;
+                },
                 send_data(type) {
                         let data = {
                                 appType:this.$route.meta.appType,
