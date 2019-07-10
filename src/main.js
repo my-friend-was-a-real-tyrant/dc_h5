@@ -15,7 +15,7 @@ var instance = axios.create({
 import Crypt from '@/aes.js';
 
 instance.interceptors.request.use(config => {
-  console.log('config',config.data);
+  //console.log('config',config.data);
   config.data = Crypt.enc(JSON.stringify(config.data));
   return config;
 },

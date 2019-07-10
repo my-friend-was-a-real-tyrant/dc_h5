@@ -1,5 +1,5 @@
 <template>
-        <div class="boss" :style="'background: linear-gradient('+$route.meta.bgcolor.start+','+$route.meta.bgcolor.end+');'">
+        <div class="boss" v-show="status == 1" :style="'background: linear-gradient('+$route.meta.bgcolor.start+','+$route.meta.bgcolor.end+');'">
                 <div class="bg">
                         <img :src="$route.meta.slices.bg" class="bg-img" alt="">
                 </div>
@@ -31,7 +31,8 @@ export default {
                         code:'',
                         wait:0,
                         deviceType:null,//设备类型，1=安卓；2=ios
-                        downurl:''
+                        downurl:'',
+                        status:0,
                 }
         },
         mounted() {
@@ -159,7 +160,10 @@ export default {
                                 uniq:this.uniq(),
                         })
                         .then((res)=>{
+                                //console.log(res);
+                                this.status = res.data.status;
                                 if(res.code == 200 && 'downurl' in res.data) {
+                                        
                                         this.downurl = res.data.downurl;
                                         if(type == 2) {
                                                 this.download();
