@@ -9,28 +9,32 @@ Vue.config.productionTip = false
 
 import axios from 'axios'
 var instance = axios.create({
-  baseURL: 'https://api.haoxianghuaqian.com/',  // api的base_url
   timeout: 5000  // 请求超时时间
 })
+
+import Crypt from '@/aes.js';
+
 instance.interceptors.request.use(config => {
+  console.log('config',config.data);
+  config.data = Crypt.enc(JSON.stringify(config.data));
   return config;
 },
   error => {
     Promise.reject(error)
   })
 instance.interceptors.response.use(response => {
-  return response.data;
+  return JSON.parse(Crypt.dec(response.data));
 },
   error => {
     Promise.reject(error)
   })
 Vue.prototype.$axios = instance;
 
-Vue.prototype.console = function(msg,data) {
-  console.info(msg,data)
+Vue.prototype.$get_time = () => {
+  return (new Date()).getTime() / 1000;
 }
 
-router.beforeEach((to,from,next)=>{
+router.beforeEach((to, from, next) => {
   document.title = to.meta.title;
   next()
 })

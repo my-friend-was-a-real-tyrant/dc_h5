@@ -14,7 +14,7 @@ export default new Router({
           bg:'/static/slices/boss_bg.png',
           btn:'/static/slices/boss_btn.png',
         },
-        appType:0,
+        appType:1,
         bgcolor:{
           start:'#4ECDB1',
           end:'#38C6A7'
@@ -31,7 +31,7 @@ export default new Router({
           bg:'/static/slices/yixiang_bg.png',
           btn:'/static/slices/yixiang_btn.png',
         },
-        appType:1,
+        appType:3,
         bgcolor:{
           start:'#fd853a',
           end:'#FFB038'

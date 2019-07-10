@@ -7,7 +7,7 @@
                         <div class="panel">
                                 <div class="tip">用钱就找来贷吧</div>
                                 <div class="input-box">
-                                        <input type="text" placeholder="请输入手机号" v-model="telephone">
+                                        <input type="text" placeholder="请输入手机号" v-model="telphone">
                                 </div>
                                 <div class="input-box">
                                         <input type="text" placeholder="请输入验证码" v-model="code">
@@ -24,172 +24,162 @@
 <script>
 import { Toast } from 'vant';
 import 'vant/lib/toast/style'
-import Crypt from '@/aes.js';
+import md5 from 'js-md5';
 export default {
-        watch:{
-                '$route':{
-                        handler(n,o) {
-                                window.location.reload()
-                        },
-                        deep:true
-                }
-        },
         data() {
                 return {
-                        telephone:'',
+                        telphone:'',
                         code:'',
-                        channelCode:'',
                         wait:0,
-                        deviceType:null,
-                        downloadUrl:''
+                        deviceType:null,//设备类型，1=安卓；2=ios
+                        downurl:''
                 }
         },
         mounted() {
-                this.channelCode = this.$route.query.channelCode
-                this.setDevice()
-                this.send_data(0);
-                this.get_download_link();
-                (function () {
-                let myFunction
-                let isWXAndIos = isWeiXinAndIos()
-                if (isWXAndIos) {
-                document.body.addEventListener('focusin', () => {
-                clearTimeout(myFunction)
-                })
-                document.body.addEventListener('focusout', () => {
-                clearTimeout(myFunction)
-                myFunction = setTimeout(function() {
-                        window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
-                }, 100)
-                })
-                }
-                })()
+                this.set_device();
+                this.send_BP(1);//发送埋点
 
-                function isWeiXinAndIos () {
-                let ua = '' + window.navigator.userAgent.toLowerCase()
-                let isWeixin = /MicroMessenger/i.test(ua)
-                let isIos = /\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(ua)
-                return isWeixin && isIos
-                }
+                //
+                //this.listens();
         },
         methods:{
-                download() {
-                        window.location.href = this.downloadUrl;
+                start_wait() {
+                        this.wait = 60;
+                        var t = null;
+
+                        t = setInterval(()=>{
+                                if(this.wait>0) {
+                                        this.wait --
+                                } else {
+                                        clearInterval(t);
+                                }
+                        },1000)
                 },
-                send_data(type) {
-                        let data = {
-                                appType:this.$route.meta.appType,
-                                channelCode:this.channelCode,
-                                type:type
-                        };
-                        this.$axios.get('/api/user/traceChannel',{params:data})
+                //
+                send_sms() {
+                        this.handle_submit()
+                        return;
+
+                        if(this.wait>0) {
+                                Toast.fail(this.wait+'秒后可重新发送')
+                        } else {
+                                this.$axios.post('https://api.haoxianghuaqian.com/send.code?platform=3',{
+                                        main_channel:this.$route.meta.appType,
+                                        t:this.$get_time(),
+                                        app_version:'1.0',
+                                        push_str:this.$route.query.push_str ? this.$route.query.push_str : '',
+
+                                        phone:this.telphone,
+                                        type:1
+                                })
+                                .then((res)=>{
+                                        //console.log(res);
+                                        if(res.code == 200) {
+                                                this.start_wait();
+                                                Toast.success(res.msg);
+                                        } else {
+                                                Toast.fail(res.msg);
+                                        }
+                                })
+                        }
                 },
-                setDevice() {
+                //修复微信Bug
+                listens() {
+                        (function () {
+                        let myFunction
+                        let isWXAndIos = isWeiXinAndIos()
+                        if (isWXAndIos) {
+                        document.body.addEventListener('focusin', () => {
+                        clearTimeout(myFunction)
+                        })
+                        document.body.addEventListener('focusout', () => {
+                        clearTimeout(myFunction)
+                        myFunction = setTimeout(function() {
+                                window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
+                        }, 100)
+                        })
+                        }
+                        })()
+
+                        function isWeiXinAndIos () {
+                        let ua = '' + window.navigator.userAgent.toLowerCase()
+                        let isWeixin = /MicroMessenger/i.test(ua)
+                        let isIos = /\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(ua)
+                        return isWeixin && isIos
+                        }
+                },
+                //判断设备
+                set_device() {
                         var u = navigator.userAgent, app = navigator.appVersion;
                         var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //g
                         var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
                         if(isIOS) {
-                                this.deviceType = 0;
+                                this.deviceType = 2;
                         } else {
                                 this.deviceType = 1;
                         }
                 },
-                get_download_link() {
-                        this.$axios.get('/api/appVersion/getAppVersion',{
-                                params:{
-                                        appType:this.$route.meta.appType,
-                                        device:this.deviceType
-                                },
-                        })
-                        .then((res)=>{
-                                if(res.code==0) {
-                                        let find = res.data.replace(new RegExp(/\n/,"gm"),'');
-                                        let resdata = JSON.parse(Crypt.Decrypt(find))
-                                        console.log(resdata)
-                                        this.downloadUrl = resdata.url || '';
-                                } else {
-                                        Toast.fail(res.msg);
-                                }
-                        })
+                download() {
+                        window.location.href = this.downurl;
                 },
                 handle_submit() {
-                        if(this.telephone.length!=11) {
-                                Toast.fail('请先输入一个正确的手机号')
-                                return;
-                        } else if(this.code.length==0) {
-                                Toast.fail('请先输入验证码')
-                                return
-                        }
-                        let data = {
-                                appType:this.$route.meta.appType,
-                                telephone:this.telephone,
-                                vCode:this.code,
-                                uuid:'1',
-                                channelCode:this.channelCode,
-                                isreg:0
-                        };
+                        this.$axios.post('https://api.haoxianghuaqian.com/login?platform=3',{
+                                main_channel:this.$route.meta.appType,
+                                t:this.$get_time(),
+                                app_version:'1.0',
+                                push_str:this.$route.query.push_str ? this.$route.query.push_str : '',
 
-                        this.$axios.get('/api/user/register',{params:data})
+                                phone:this.telphone,
+                                code:this.code,
+                        })
                         .then((res)=>{
-                                if(res.code == 0) {
-                                        Toast.success(res.msg)
-                                        this.send_data(1);
-                                        this.download()
+                                if(res.code == 200) {
+                                        Toast.success(res.msg);
+                                        this.send_BP(2);
+                                        
                                 } else {
                                         Toast.fail(res.msg);
                                 }
                         })
-                        .catch((err)=>{
-                                Toast.fail('网络错误');
+                        .catch((error)=>{
+                                //console.log(error)
                         })
                 },
-                start_timing() {
-                        var t = null;
-                        t = setInterval(()=>{
-                                if(this.wait == 0) {
-                                        clearInterval(t)
-                                } else {
-                                        this.wait --;
-                                }
-                        },1000)
-                },
-                send_sms() {
-                        if(this.telephone.length!=11) {
-                                Toast.fail('请先输入一个正确的手机号')
-                                return;
-                        }
-                        if(this.wait>0) {
-                                Toast.fail('等待'+this.wait+'秒可重新发送')
-                                return
-                        }
-                        let data  ={
-                                appType:this.$route.meta.appType,
-                                telephone:this.telephone
-                        }
-                        this.console('发送验证码',data)
-                        Toast.loading({
-                                mask: true,
-                                message: '发送中...'
-                        });
-                        this.$axios.get('/api/user/sendVcode',{
-                                params:data
+                //发送埋点，1=页面进入，2=点击下载
+                send_BP(type) {
+                        this.$axios.post('https://api.haoxianghuaqian.com/h5?platform=3',{
+                                //公共参数
+                                main_channel:this.$route.meta.appType,
+                                t:this.$get_time(),
+                                app_version:'1.0',
+                                push_str:this.$route.query.push_str ? this.$route.query.push_str : '',
+
+                                //业务参数
+                                type:type,
+                                pingtai:this.deviceType,
+                                uniq:this.uniq(),
                         })
                         .then((res)=>{
-                                Toast.clear()
-                                if(res.code == 0) {
-                                        Toast.success(res.msg)
-                                        this.wait = 60;
-                                        this.start_timing()
-                                } else {
-                                        Toast.fail(res.msg)
+                                if(res.code == 200 && 'downurl' in res.data) {
+                                        this.downurl = res.data.downurl;
+                                        if(type == 2) {
+                                                this.download();
+                                        }
                                 }
+                                //alert(this.downurl)
                         })
-                        .catch((err)=>{
-                                Toast.clear()
-                                Toast.fail('发送失败，网络错误')
-                        })
+                },
+                uniq() {
+                        //return 1;
+                        if(localStorage.getItem('uniq')) {
+                                return localStorage.getItem('uniq');
+                        } else {
+                                localStorage.setItem('uniq',md5(Math.random().toString()));
+                                return localStorage.getItem('uniq');
+                        }
                 }
-        }
+        },
+        
 }
 </script>
 <style lang="less">
