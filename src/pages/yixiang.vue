@@ -39,7 +39,7 @@ export default {
                 this.send_BP(1);//发送埋点
 
                 //
-                //this.listens();
+                this.listens();
         },
         methods:{
                 start_wait() {
