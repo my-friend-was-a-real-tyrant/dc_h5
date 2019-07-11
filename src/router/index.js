@@ -23,10 +23,10 @@ export default new Router({
       component: resolve=>require(['@/pages/boss.vue'],resolve)
     },
     {
-      path: '/yixiang',
-      name: 'yixiang',
+      path: '/xindongdai',
+      name: 'xindongdai',
       meta:{
-        title:'壹向钱站',
+        title:'薪动贷',
         slices:{
           bg:'/static/slices/yixiang_bg.png',
           btn:'/static/slices/yixiang_btn.png',
