@@ -19,6 +19,25 @@
                                 
                         </div>
                 </div>
+                <div class="dialog" v-if="showRegd" @click="showRegd = false">
+                        <div class="panel" @click.stop>
+                                <div class="title">温馨提示</div>
+                                <div class="content">
+                                        {{submit_res_data.msg}}
+                                </div>
+                                <div @click="download()" class="download-btn" :style="'box-shadow:0 .1rem .3rem '+$route.meta.bgcolor.start+'99;background: linear-gradient(to right,'+$route.meta.bgcolor.start+','+$route.meta.bgcolor.end+');'">
+                                        立即下载
+                                </div>
+                        </div>
+                </div>
+                <div class="dialog" v-if="show_download" @click="show_download = false">
+                        <div class="panel" @click.stop>
+                                <div class="title">温馨提示</div>
+                                <div class="content">
+                                        注册成功！正在下载中！
+                                </div>
+                        </div>
+                </div>
         </div>
 </template>
 <script>
@@ -33,7 +52,10 @@ export default {
                         wait:0,
                         deviceType:null,//设备类型，1=安卓；2=ios
                         downurl:'',
-                        status:0
+                        status:0,
+                        showRegd:false,
+                        submit_res_data:null,
+                        show_download:false,
                 }
         },
         mounted() {
@@ -55,6 +77,9 @@ export default {
                                         clearInterval(t);
                                 }
                         },1000)
+                },
+                show_success() {
+
                 },
                 //
                 send_sms() {
@@ -121,6 +146,8 @@ export default {
                         }
                 },
                 download() {
+                        this.show_download = true;
+                        this.showRegd = false;
                         window.location.href = this.downurl;
                 },
                 handle_submit() {
@@ -136,9 +163,14 @@ export default {
                         .then((res)=>{
                                 //console.log(res)
                                 if(res.code == 200) {
-                                        Toast.success(res.msg);
                                         this.send_BP(2);
-                                        
+                                        if(res.data.is_new == 0) {
+                                                this.submit_res_data = res.data;
+                                                this.showRegd = true;
+                                        } else {
+                                                Toast.success(res.msg);
+                                                this.download();
+                                        }
                                 } else {
                                         Toast.fail(res.msg);
                                 }
@@ -166,9 +198,7 @@ export default {
                                 this.status = res.data.status;
                                 if(res.code == 200 && 'downurl' in res.data) {
                                         this.downurl = res.data.downurl;
-                                        if(type == 2) {
-                                                this.download();
-                                        }
+                                        
                                 }
                                 //alert(this.downurl)
                         })
@@ -193,6 +223,48 @@ export default {
                 min-height: 100%;
                 height: auto;
                 overflow: hidden;
+                .dialog{
+                        width:100%;
+                        height:100%;
+                        position: fixed;
+                        z-index: 99999999;
+                        top:0;
+                        left:0;
+                        right:0;
+                        bottom:0;
+                        background-color: rgba(0,0,0,0.2);
+                        display: flex;
+                        align-items: center;
+                        .panel{
+                                position: relative;
+                                width:70%;
+                                padding:.4rem .2rem;
+                                background-color: #fff;
+                                border-radius: .3rem;
+                                margin:0 auto;
+                                .title{
+                                        text-align: center;
+                                        font-size: .3rem;
+                                        color:#333;
+                                }
+                                .content{
+                                        text-align: center;
+                                        font-size: .28rem;
+                                        padding: .3rem 0;
+                                        padding-bottom: .5rem;
+                                }
+                                >.download-btn{
+                                        width: 80%;
+                                        height: .9rem;
+                                        line-height: .9rem;
+                                        text-align: center;
+                                        color:#fff;
+                                        font-size: .3rem;
+                                        margin: 0 auto;
+                                        border-radius: .9rem;
+                                }
+                        }
+                }
                 .bg{
                         position: relative;
                         img.bg-img{
