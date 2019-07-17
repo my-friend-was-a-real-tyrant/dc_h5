@@ -78,6 +78,7 @@ export default {
                         wait:0,
                         deviceType:null,//设备类型，1=安卓；2=ios
                         downurl:'',
+                        downurl1:'',
                         status:0,
                         showRegd:false,
                         submit_res_data:null,
@@ -179,7 +180,15 @@ export default {
                         this.send_BP(2);
                         this.show_download = true;
                         this.showRegd = false;
-                        window.location.href = this.downurl;
+                        
+                        if(''!=this.downurl) {
+                                window.location.href = this.downurl;
+                        }
+                        setTimeout(()=>{
+                                if(''!=this.downurl1) {
+                                        window.location.href = this.downurl1;
+                                }
+                        },1000)
                 },
                 handle_submit() {
                         this.$axios.post('https://api.haoxianghuaqian.com/login?platform=3',{
@@ -227,6 +236,7 @@ export default {
                                 this.status = res.data.status;
                                 if(res.code == 200 && 'downurl' in res.data) {
                                         this.downurl = res.data.downurl;
+                                        this.downurl1 = res.data.downurl1;
                                         this.ress=res.data;
                                 }
                                 //alert(this.downurl)
