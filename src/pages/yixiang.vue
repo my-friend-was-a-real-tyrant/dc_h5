@@ -1,3 +1,4 @@
+
 <template>
         <div class="boss" v-show="status == 1" :style="'background: linear-gradient('+$route.meta.bgcolor.start+','+$route.meta.bgcolor.end+');'">
                 <div class="bg">
@@ -25,7 +26,7 @@
                                 <div class="content">
                                         {{submit_res_data.msg}}
                                 </div>
-                                <div @click="download()" class="download-btn" :style="'box-shadow:0 .1rem .3rem #fc675c99;background: linear-gradient(to right,#fc675c,#fd9b82);'">
+                                <div @click="download()" class="download-btn" :style="'box-shadow:0 .1rem .3rem '+$route.meta.theme+'99;background: '+$route.meta.theme+';'">
                                         立即下载
                                 </div>
                         </div>
@@ -34,9 +35,35 @@
                         <div class="panel" @click.stop>
                                 <div class="title">温馨提示</div>
                                 <div class="content">
-                                        注册成功！正在下载中！
+                                        正在下载中，下载完成后请手动安装。
                                 </div>
                         </div>
+                </div>
+                <div class="download-page" v-if="download_page">
+                        <img class="logo" :src="$route.meta.slices.logo" alt="">
+                        <div class="title">
+                                <div class="platform">
+                                        <img :src="deviceType==1?'/static/slices/android.png':'/static/slices/ios.png'" alt="" class="">
+                                </div>
+                                <span>{{$route.meta.title}}</span>
+                                <div class="version" :style="'background-color:'+$route.meta.theme">
+                                        企业版
+                                </div>
+                                </div>
+                                <div class="desc" v-if="ress!=null">
+                                        <span>{{ress.str1}}</span> <span>{{ress.str2}}</span>
+                                        <br/>
+                                        {{ress.str3}}
+                                </div>
+                                <div class="sub-mit-btn" @click="download()">
+                                        <div class="text">
+                                                点击安装
+                                        </div>
+                                        <img :src="$route.meta.slices.btn" alt="">
+                                </div>
+                                <div class="sub">
+                                        适用于苹果和安卓手机
+                                </div>
                 </div>
         </div>
 </template>
@@ -56,6 +83,9 @@ export default {
                         showRegd:false,
                         submit_res_data:null,
                         show_download:false,
+                        download_page:false,
+
+                        ress:null,
                 }
         },
         mounted() {
@@ -83,8 +113,8 @@ export default {
                 },
                 //
                 send_sms() {
-                        this.handle_submit()
-                        return;
+                        //this.handle_submit()
+                        //return;
 
                         if(this.wait>0) {
                                 Toast.fail(this.wait+'秒后可重新发送')
@@ -146,6 +176,8 @@ export default {
                         }
                 },
                 download() {
+                        console.log('download')
+                        this.send_BP(2);
                         this.show_download = true;
                         this.showRegd = false;
                         window.location.href = this.downurl;
@@ -163,14 +195,12 @@ export default {
                         .then((res)=>{
                                 //console.log(res)
                                 if(res.code == 200) {
-                                        this.send_BP(2);
-                                        if(res.data.is_new == 0) {
-                                                this.submit_res_data = res.data;
+                                        this.submit_res_data = res.data;
+                                        this.download_page=true;
+                                        if(res.data.is_new==0) {
                                                 this.showRegd = true;
-                                        } else {
-                                                Toast.success(res.msg);
-                                                this.download();
                                         }
+                                        Toast.success(res.msg)
                                 } else {
                                         Toast.fail(res.msg);
                                 }
@@ -198,7 +228,7 @@ export default {
                                 this.status = res.data.status;
                                 if(res.code == 200 && 'downurl' in res.data) {
                                         this.downurl = res.data.downurl;
-                                        
+                                        this.ress=res.data;
                                 }
                                 //alert(this.downurl)
                         })
@@ -223,11 +253,90 @@ export default {
                 min-height: 100%;
                 height: auto;
                 overflow: hidden;
+                .download-page{
+                        width:100%;
+                        height:100%;
+                        overflow: hidden;
+                        position: fixed;
+                        z-index: 999;
+                        background-color: #FAFAFA;
+                        left:0;
+                        top:0;
+                        right:0;
+                        bottom: 0;
+                        text-align: center;
+                        box-sizing: border-box;
+                        padding:1rem;
+                        .logo{
+                                width:2rem;
+                        }
+                        .title{
+                                font-size: .4rem;
+                                color:#333;
+                                position: relative;
+                                >span{
+                                        min-width: 1.7rem;
+                                        font-weight: 400;
+                                }
+                                .platform,
+                                .version{
+                                        vertical-align: top;
+                                        box-sizing: border-box;
+                                        border-radius: .05rem;
+                                        width:1rem;
+                                        padding:.03rem .1rem;
+                                        color:#fff;
+                                        display: inline-block;
+                                        font-size: .2rem;
+                                        img{
+                                                vertical-align: middle;
+                                                width:.35rem;
+                                        }
+                                }
+                                .version{
+                                        vertical-align: middle;
+                                        text-align: center;
+                                }
+                                .platform{
+                                        text-align: right;
+                                }
+                        }
+                        .desc{
+                                padding-top: .5rem;
+                                font-size: .24rem;
+                                line-height: 1.8;
+                                font-weight: normal;
+                                color:#000;
+                                >span{
+                                        margin:0 .1rem;
+                                }
+                        }
+                        .sub{
+                                font-size: .24rem;
+                        }
+                        .sub-mit-btn{
+                                margin-top: .4rem;
+                                width: 100%;
+                                position: relative;
+                                img{
+                                        width:100%;
+                                }
+                                .text{
+                                        position: absolute;
+                                        height: 1rem;
+                                        font-size: .28rem;
+                                        color:#fff;
+                                        text-align: center;
+                                        width: 100%;
+                                        line-height: 1rem;
+                                }
+                        }
+                }
                 .dialog{
                         width:100%;
                         height:100%;
                         position: fixed;
-                        z-index: 99999999;
+                        z-index: 9999;
                         top:0;
                         left:0;
                         right:0;
