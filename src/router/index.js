@@ -44,6 +44,25 @@ export default new Router({
       component: resolve=>require(['@/pages/yixiang.vue'],resolve)
     },
     {
+      path: '/jdfq',
+      name: 'jdfq',
+      meta:{
+        title:'借贷分期',
+        slices:{
+          bg:'/static/slices/jdfq-bg.png',
+          btn:'/static/slices/yixiang_btn.png',
+          logo:'/static/slices/jdfqlogo.png',
+        },
+        appType:4,
+        bgcolor:{
+          start:'#43BCFE',
+          end:'#477BFE'
+        },
+        theme:'#FA6464'
+      },
+      component: resolve=>require(['@/pages/jdfq.vue'],resolve)
+    },
+    {
       path: '/laidaiba',
       name: 'laidaiba',
       meta:{
