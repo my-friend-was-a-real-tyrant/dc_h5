@@ -2,30 +2,36 @@
   <div class="boss" v-show="status == 1"
        :style="'background: linear-gradient('+$route.meta.bgcolor.start+','+$route.meta.bgcolor.end+');'">
     <div class="bg">
-      <img :src="$route.meta.slices.bg" class="bg-img" alt="">
+      <img :src="$route.meta.slices.bg" class="bg-img" alt=""/>
     </div>
-    <div class="main">
+    <div class="main" style="margin-top: -1rem">
       <div class="panel">
-        <div class="input-box">
-          <input type="text" placeholder="请输入手机号" v-model="telphone">
+        <div class="input-box" style="border-top-color: #ccc;">
+          <img class="input-box-icon" src="../../static/slices/xzd_user.png"/>
+          <input type="text" placeholder="请输入手机号" v-model="telphone"/>
         </div>
-        <div class="input-box">
-          <input type="text" placeholder="请输入验证码" v-model="code">
-          <span class="send-btn" :class="wait>0?'disabled':''"
-                @click="send_sms">{{wait>0?`剩余${wait}s`:waitMsg}}</span>
+        <div class="input-box" style="padding-right: .4rem">
+          <img class="input-box-icon" src="../../static/slices/xzd_lock.png"/>
+          <input type="text" style="padding-right: 0" placeholder="请输入验证码" v-model="code"/>
+          <span class="send-btn send-width" :class="wait>0?'disabled':''"
+                @click="send_sms">{{wait>0?`剩余${wait}s`:waitMsg}}
+          </span>
         </div>
-        <div class="submit-btn" @click="handle_submit">
-          <img class="btn-img" :src="$route.meta.slices.btn" alt="">
-          <span class="text">立即申请</span>
+        <div class="input-box" style="padding: 0;">
+          <div class="submit-btn" @click="handle_submit">
+            <span class="text">马上借款</span>
+          </div>
         </div>
-
+        <!--<div class="submit-btn" @click="handle_submit">-->
+          <!--<span class="text">马上借款</span>-->
+        <!--</div>-->
       </div>
     </div>
     <div class="dialog" v-if="showRegd" @click="showRegd = false">
       <div class="panel" @click.stop>
         <div class="title">温馨提示</div>
         <div class="content">
-          {{submit_res_data.msg}}
+          {{submit_res_data.msg||""}}
         </div>
         <div @click="download()" class="download-btn"
              :style="'box-shadow:0 .1rem .3rem '+$route.meta.theme+'99;background: '+$route.meta.theme+';'">
@@ -53,7 +59,7 @@
         </div>
       </div>
       <div class="desc" v-if="ress!=null">
-        <span>{{ress.str1}}</span> <span>{{ress.str2}}</span>
+        <span>{{ress.str1}}</span><span>{{ress.str2}}</span>
         <br/>
         {{ress.str3}}
       </div>
@@ -67,6 +73,11 @@
         适用于苹果和安卓手机
       </div>
     </div>
+    <van-popup v-model="show" class="popup" round
+               :overlay-style="{background: 'rgba(0, 0, 0, 0.2)'}">
+      <p class="popup-p1">温馨提示</p>
+      <p class="popup-p1">{{showMsg}}</p>
+    </van-popup>
   </div>
 </template>
 <script>
@@ -124,12 +135,11 @@
         if (this.wait > 0) {
           Toast.fail(this.wait + '秒后可重新发送')
         } else {
-          this.$axios.post('https://api.haoxianghuaqian.com/send.code?platform=3', {
+          this.$axios.post('http://dev.api.haoxianghuaqian.com/send.code?platform=3', {
             main_channel: this.$route.meta.appType,
             t: this.$get_time(),
             app_version: '1.0',
             push_str: this.$route.query.push_str ? this.$route.query.push_str : '',
-
             phone: this.telphone,
             type: 1
           })
@@ -205,7 +215,8 @@
           Toast.fail("请填写有效验证码")
           return
         }
-        this.$axios.post('https://api.haoxianghuaqian.com/login?platform=3', {
+
+        this.$axios.post('http://dev.api.haoxianghuaqian.com/login?platform=3', {
           main_channel: this.$route.meta.appType,
           t: this.$get_time(),
           app_version: '1.0',
@@ -222,7 +233,8 @@
               // if(res.data.is_new==0) {
               //         this.showRegd = true;
               // }
-              Toast.success(res.msg)
+              this.show = true
+              this.showMsg = res.msg
             } else {
               Toast.fail(res.msg);
             }
@@ -230,10 +242,13 @@
           .catch((error) => {
             //console.log(error)
           })
+        setTimeout(() => {
+          this.show = false
+        }, 2000)
       },
       //发送埋点，1=页面进入，2=点击下载
       send_BP(type) {
-        this.$axios.post('https://api.haoxianghuaqian.com/h5?platform=3', {
+        this.$axios.post('http://dev.api.haoxianghuaqian.com/h5?platform=3', {
           //公共参数
           main_channel: this.$route.meta.appType,
           t: this.$get_time(),
@@ -246,7 +261,6 @@
           uniq: this.uniq(),
         })
           .then((res) => {
-            //console.log(res);
             this.status = res.data.status;
             if (res.code == 200 && 'downurl' in res.data) {
               this.downurl = res.data.downurl;
@@ -276,6 +290,175 @@
     min-height: 100%;
     height: auto;
     overflow: hidden;
+
+    .main {
+      padding: 0 .4rem;
+      box-sizing: border-box;
+      margin-top: -3.5rem;
+      width: 100%;
+      position: relative;
+      margin-bottom: .4rem;
+      z-index: 9;
+
+      .top {
+        position: relative;
+        width: 3.9rem;
+        height: 0.51rem;
+        background: rgba(78, 243, 246, 1);
+        border-radius: 2rem;
+        margin: .5rem auto;
+
+        p {
+          font-size: 0.28rem;
+          font-weight: bold;
+          color: rgba(0, 134, 136, 1);
+          text-align: center;
+          height: 0.05rem;
+          line-height: 0.5rem;
+        }
+
+      }
+
+      .panel {
+        width: 100%;
+        height: auto;
+        box-sizing: border-box;
+        background-color: #fff;
+        border-radius: .1rem;
+        padding: .4rem 0;
+
+        .tabs {
+          border-bottom: 1px solid #E7E7E7;
+          height: auto;
+          /*width: 100%;*/
+          display: flex;
+          margin-bottom: .3rem;
+          padding: 0 .8rem .3rem .8rem;
+          flex-direction: row;
+          justify-content: space-between;
+
+          &-img {
+          }
+
+          &-p {
+            width: 1.3rem;
+            height: 0.21rem;
+            font-size: 0.22rem;
+            font-family: PingFangSC-Regular;
+            font-weight: 400;
+            color: rgba(102, 102, 102, 1);
+            line-height: 0.22rem;
+            margin: 0;
+            padding: 0;
+          }
+
+          div {
+            width: 1rem;
+            height: 1.2rem;
+          }
+        }
+
+        .submit-btn {
+          position: relative;
+          width: 100%;
+          /*padding: 0 .2rem;*/
+          box-sizing: border-box;
+          /*width: 5.6rem;*/
+          height: 0.98rem;
+          background: rgba(125, 162, 237, 1);
+          border-radius: 0.1rem;
+
+          margin: 0 auto;
+          /*margin: 0 0.4rem;*/
+
+          .btn-img {
+            width: 100%;
+          }
+
+          .text {
+            color: #fff;
+            font-size: .3rem;
+            position: absolute;
+            line-height: 0.98rem;
+            /*top: 0;*/
+            left: 0;
+            right: 0;
+            /*bottom: .35rem;*/
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+
+        .input-box {
+          display: flex;
+          height: 1rem;
+          box-sizing: border-box;
+          line-height: 1rem;
+          background-color: #f8f8f8;
+          border-radius: 0.1rem;
+          margin: 0 .4rem;
+          margin-bottom: .24rem;
+          padding: 0 .4rem;
+          flex-wrap: nowrap;
+          &-icon {
+            height: 0.3rem;
+            /*width: 0.27rem;*/
+            margin: .36rem 0 .36rem 0;
+          }
+
+          input {
+            flex: 1;
+            display: block;
+            background-color: rgba(0, 0, 0, 0);
+            outline: none;
+            font-size: .24rem;
+            padding-left: 0.3rem;
+            border: 0;
+            flex-shrink: 0;
+            width: 2rem;
+          }
+
+          input::-webkit-input-placeholder {
+            color: #ccc;
+          }
+
+          input::-moz-placeholder { /* Mozilla Firefox 19+ */
+            color: #ccc;
+          }
+
+          input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+            color: #ccc;
+          }
+
+          input:-ms-input-placeholder { /* Internet Explorer 10-11 */
+            color: #ccc;
+          }
+
+          .send-btn {
+            /*padding-left: .1rem;*/
+            font-size: .24rem;
+            color: #4781D8;
+            line-height: 1rem;
+          }
+          .send-width{
+            flex-shrink: 0;
+            display: block;
+            color: red;
+            background: #000;
+            /*width: 2rem;*/
+          }
+          .send-btn.disabled {
+            color: #aaa;
+          }
+        }
+
+        .foot {
+          text-align: center;
+          margin: -0.2rem 0;
+        }
+      }
+    }
 
     .download-page {
       width: 100%;
@@ -414,6 +597,8 @@
           margin: 0 auto;
           border-radius: .9rem;
         }
+
+
       }
     }
 
@@ -426,93 +611,19 @@
       }
     }
 
-    .main {
-      padding: 0 .4rem;
-      box-sizing: border-box;
-      margin-top: -0.7rem;
-      width: 100%;
-      position: relative;
-      margin-bottom: .4rem;
-      z-index: 9;
+    .popup {
+      padding: .3rem;
+      width: 5rem;
+      min-height: auto;
 
-      .panel {
-        width: 100%;
-        height: auto;
-        box-sizing: border-box;
-        background-color: #fff;
-        border-radius: .1rem;
-        padding: .4rem 0;
-
-        .submit-btn {
-          position: relative;
-          width: 100%;
-          padding: 0 .2rem;
-          box-sizing: border-box;
-
-          .btn-img {
-            width: 100%;
-          }
-
-          .text {
-            color: #fff;
-            font-size: .3rem;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: .35rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-        }
-
-        .input-box {
-          display: flex;
-          height: 1rem;
-          background-color: #f8f8f8;
-          border-radius: 1rem;
-          margin: 0 .4rem;
-          margin-bottom: .24rem;
-          padding: 0 .4rem;
-
-          input {
-            flex: 1;
-            display: block;
-            background-color: rgba(0, 0, 0, 0);
-            outline: none;
-            font-size: .24rem;
-            border: 0;
-          }
-
-          input::-webkit-input-placeholder {
-            color: #ccc;
-          }
-
-          input::-moz-placeholder { /* Mozilla Firefox 19+ */
-            color: #ccc;
-          }
-
-          input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-            color: #ccc;
-          }
-
-          input:-ms-input-placeholder { /* Internet Explorer 10-11 */
-            color: #ccc;
-          }
-
-          .send-btn {
-            padding-left: .1rem;
-            font-size: .24rem;
-            color: #FF9392;
-            line-height: 1rem;
-          }
-
-          .send-btn.disabled {
-            color: #aaa;
-          }
-        }
-
+      &-p1 {
+        height: 0.3rem;
+        font-size: 0.32rem;
+        font-family: PingFangSC-Regular;
+        font-weight: 400;
+        color: rgba(51, 51, 51, 1);
+        line-height: 0.22rem;
+        text-align: center;
       }
     }
   }

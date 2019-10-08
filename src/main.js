@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-
+import { Popup } from 'vant';
 import '@/rem.js'
 Vue.config.productionTip = false
 
@@ -13,7 +13,7 @@ var instance = axios.create({
 })
 
 import Crypt from '@/aes.js';
-
+Vue.use(Popup);
 instance.interceptors.request.use(config => {
   //console.log('config',config.data);
   config.data = Crypt.enc(JSON.stringify(config.data));
